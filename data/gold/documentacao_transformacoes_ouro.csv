@@ -1,0 +1,11 @@
+etapa,dataset,coluna,tecnica,justificativa
+1,incidents,days_to_discovery / days_to_disclosure,Feature engineering temporal,Captura latencia de deteccao/divulgacao sem risco de leakage
+2,incidents,"company_name, attack_chain, etc.",Remocao de colunas texto/URL/metadados,Sem valor preditivo; aumentariam dimensionalidade sem ganho
+3,incidents+financials,all,Left join por incident_id,72 incidentes sem dado financeiro -> nulos tratados nas etapas seguintes
+4,incidents,company_revenue_usd,"Winzorizacao IQR (cap = Q3 + 3xIQR, calculado no treino)",Receita tem distribuicao altamente assimetrica; 3xIQR preserva variacao real sem descartar casos extremos legitimos
+5,financials,total_loss_usd,log1p transform,Skewness > 5; log1p aproxima normalidade sem descartar zeros
+6,incidents,attribution_confidence,OrdinalEncoder (desconhecido < unknown < probable < suspected < confirmed),Hierarquia semantica de certeza; ordinal captura com menos colunas que OHE
+7,incidents+financials,"attack_vector_primary, data_type, etc.",OneHotEncoder (handle_unknown=ignore),Variaveis nominais sem ordem; OHE evita ordenacao artificial
+8,incidents+financials,numericas continuas,SimpleImputer(strategy=median) - Estrategia 1,Mediana robusta para colunas financeiras com assimetria (72 nulos pos-merge)
+9,financials,"direct_loss_method, ransom_source","SimpleImputer(strategy=constant, fill_value='nao_disponivel') - Estrategia 2",Nulos indicam ausencia de dado; constante preserva semantica
+10,todos,numericas continuas,"RobustScaler (fit no treino, transform em ambos)",Usa mediana/IQR -> resistente a outliers residuais pos-winzorizacao

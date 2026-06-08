@@ -1,0 +1,11 @@
+dataset,coluna,risco,status_ouro
+incidents,quality_score,ALTO,REMOVIDA (Silver)
+incidents,quality_grade,ALTO,REMOVIDA (Silver)
+incidents,confidence_tier,ALTO,REMOVIDA (Silver)
+incidents,review_flag,ALTO,REMOVIDA (Silver)
+incidents,data_compromised_records,ALTO,REMOVIDA da Gold — fonte direta do target _is_high_impact (leakage)
+incidents,downtime_hours,ALTO,REMOVIDA da Gold — fonte direta do target _is_high_impact (leakage)
+financials,total_loss_usd,MEDIO,FEATURE (log1p + RobustScaler)
+incidents,_is_high_impact,ALTO,TARGET — excluida das features
+financials,_is_severe_loss,ALTO,LABEL AUXILIAR — excluida das features
+market,_is_significant_drop,ALTO,LABEL AUXILIAR — excluida das features

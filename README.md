@@ -1,61 +1,82 @@
-﻿# Projeto: Pipeline Medalion — Bronze, Prata, Ouro e ML-Ready
+# Projeto: Pipeline Medallion — Bronze, Prata, Ouro e ML-Ready
 
 ## Descrição do Projeto
-Este repositório implementa um pipeline de cibersegurança em camadas: Bronze (ingestão), Prata (limpeza), Ouro (feature engineering) e ML-Ready (modelagem). O objetivo é transformar dados de incidentes e impactos financeiros em um conjunto robusto para análise e predição de alto impacto.
+Este repositório implementa um pipeline de engenharia de dados para cibersegurança seguindo a Arquitetura Medallion: Bronze (ingestão), Prata (limpeza), Ouro (feature engineering) e ML-Ready (modelagem). O objetivo é transformar dados de incidentes e impactos financeiros em um conjunto robusto para análise e predição de alto impacto.
 
 ## Pré-requisitos
 - Python 3.9+
-- Java 11+
-- Apache Spark 3.x
-- Dependências Python disponíveis em `requirements.txt`
+- Java 17 ou superior (testado com Java 23)
+- PySpark 4.x (instalado via `requirements.txt`)
+- Dependências Python listadas em `requirements.txt`
+
+> **Atenção (Windows):** O Java 17+ requer a flag `-Djava.security.manager=allow` para compatibilidade com o Hadoop interno do PySpark. Essa configuração já está aplicada na célula de inicialização do Spark no notebook — nenhuma ação manual é necessária.
 
 ## Instalação
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ## Como executar
-1. Abra o notebook `notebook.ipynb`.
-2. Execute a seção de **Bronze** para ingestão dos dados brutos.
-3. Execute a seção de **Prata** para limpeza e validação.
-4. Execute a seção de **Ouro** para feature engineering e preparação ML-Ready.
-5. Execute a seção de **ML-Ready** para treino e avaliação de Decision Trees.
-6. Execute a seção de **PySpark** para refatoração, join, agregações e window function.
+
+1. Abra o arquivo `notebook.ipynb` no VS Code, JupyterLab ou Jupyter Notebook.
+2. Execute **todas as células em ordem**, de cima para baixo.
+3. O notebook está organizado nas seguintes seções:
+
+| # | Seção | O que faz |
+|---|-------|-----------|
+| 1 | **Bronze** | Lê os CSVs brutos, converte para Parquet e adiciona metadados |
+| 2 | **Silver** | Limpeza, padronização, imputação de nulos e criação de labels ML |
+| 3 | **EDA** | Análise exploratória e validação de 3 hipóteses de negócio |
+| 4 | **Ouro** | Feature engineering, encoding, scaling e salvamento ML-ready |
+| 5 | **Modelagem ML** | Treino e avaliação de Decision Trees; comparação Prata × Ouro |
+| 6 | **PySpark** | Join, aggregation e window functions; comparação de tempo Pandas × Spark |
+| 7 | **Data Lineage** | Registro completo do fluxo de dados do pipeline |
 
 ## Arquitetura das camadas
+
 | Camada | Descrição | Formato de Saída |
 |--------|-----------|------------------|
-| Bronze | Dados brutos ingeridos e convertidos para Parquet | Parquet |
-| Prata | Dados limpos, validados e sem leakage | Parquet |
-| Ouro | Dados com feature engineering e pré-processamento | Parquet |
-| ML-Ready | Dataset pronto para treino de modelos | Parquet |
+| Bronze | Dados brutos convertidos para Parquet com metadados de ingestão | Parquet |
+| Prata | Dados limpos, validados, sem leakage e com labels ML criadas | Parquet |
+| Ouro | Features encoded e scaled, prontas para treinamento (fit/transform) | Parquet |
+| ML-Ready | Dataset unificado com coluna `_split` para treino e teste | Parquet |
 
 ## Entregáveis
+
 | Entregável | Caminho |
 |------------|---------|
 | Notebook principal | `notebook.ipynb` |
+| Dataset ML-Ready | `data/gold/gold_dataset.parquet` |
+| Relatório de qualidade — Ouro | `data/gold/relatorio_qualidade_ouro.csv` |
+| Documentação de transformações — Ouro | `data/gold/documentacao_transformacoes_ouro.csv` |
+| Checklist anti-leakage — Ouro | `data/gold/checklist_anti_leakage_ouro.csv` |
 | Saída PySpark join | `data/gold/spark_output.parquet` |
-| Saída PySpark ranked | `data/gold/spark_ranked.parquet` |
+| Saída PySpark window | `data/gold/spark_ranked.parquet` |
 | Matriz de confusão | `docs/confusion_matrix.png` |
 | Visualização da árvore | `docs/decision_tree.png` |
-| Checklist anti-leakage | `data/silver/checklist_anti_leakage.csv` |
-| Documentação de transformações | `data/silver/documentacao_transformacoes.csv` |
+| Checklist anti-leakage — Silver | `data/silver/checklist_anti_leakage.csv` |
+| Documentação de transformações — Silver | `data/silver/documentacao_transformacoes.csv` |
 
 ## Estrutura de pastas
+
 ```text
 Arquitetura_medalion_para_cyberseguranca/
 ├── data/
-│   ├── bronze/
-│   ├── raw/
-│   ├── silver/
-│   └── gold/
-├── docs/
-├── notebook.ipynb
+│   ├── raw/          ← CSVs originais (não modificar)
+│   ├── bronze/       ← Parquet + metadados de ingestão
+│   ├── silver/       ← Parquet limpo + labels ML
+│   └── gold/         ← Parquet ML-ready + relatórios Ouro
+├── docs/             ← Figuras geradas (matriz de confusão, árvore)
+├── notebook.ipynb    ← Único arquivo de código
+├── requirements.txt
 ├── README.md
-└── requirements.txt
+└── CLAUDE.md
 ```
 
 ## Observações importantes
-- Todas as implementações de código para a modelagem e PySpark são feitas dentro de `notebook.ipynb`.
-- As figuras são salvas em `docs/`.
-- O modelo de comparação Prata × Ouro valida a importância do pré-processamento para a performance de produção.
+
+- Todo o código está em `notebook.ipynb`. Execute as células em ordem — cada seção depende das anteriores.
+- A camada Ouro aplica o padrão `fit/transform` corretamente: o `fit` ocorre exclusivamente nos dados de treino.
+- As colunas `data_compromised_records` e `downtime_hours` foram **removidas** da camada Ouro pois são a fonte direta do target `_is_high_impact` (leakage).
+- O PySpark salva os resultados via `.toPandas().to_parquet()` para evitar dependência do `winutils.exe` no Windows.
