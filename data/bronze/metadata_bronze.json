@@ -5,7 +5,7 @@
     "colunas": 20,
     "tamanho_bytes": 438941,
     "hash_sha256": "9819d9ad6baeadca4c503d1146def6504da32e42b9e14e38b0008b24ffc84225",
-    "data_carga": "2026-06-08 13:42:44",
+    "data_carga": "2026-06-08 18:11:47",
     "camada": "bronze"
   },
   {
@@ -14,7 +14,7 @@
     "colunas": 20,
     "tamanho_bytes": 109318,
     "hash_sha256": "d7f4ef0645bbc50f9e4cd159800f1f3f69f87fb5a9d0489f987f1ebc0fb827c1",
-    "data_carga": "2026-06-08 13:42:44",
+    "data_carga": "2026-06-08 18:11:47",
     "camada": "bronze"
   },
   {
@@ -23,7 +23,7 @@
     "colunas": 20,
     "tamanho_bytes": 170578,
     "hash_sha256": "9e375eb6f35b70d40166ae03e62cfe809d3e976bb9951498e6f5f2ce78b46679",
-    "data_carga": "2026-06-08 13:42:44",
+    "data_carga": "2026-06-08 18:11:47",
     "camada": "bronze"
   }
 ]

@@ -22,19 +22,22 @@ Conduzir a análise exploratória usando os dados da camada Prata como base, for
 ### Tarefas
 
 **H1 — Hipótese sobre severidade por tipo de ataque**
-- Hipótese sugerida: *"Ataques do tipo ransomware e supply_chain concentram maior impacto financeiro (total_loss_usd) em comparação com outros vetores."*
-- Gráfico 1: Distribuição de `total_loss_usd` por `attack_vector` (boxplot ou violin plot)
-- Gráfico 2: Análise de outliers de `total_loss_usd` (boxplot + IQR visualizado) com identificação de casos extremos por setor
+- Hipótese implementada: *"APT gera o maior prejuízo financeiro típico por incidente, enquanto ransomware é o vetor que mais produz perdas extremas, dada a combinação de alto volume e alta frequência de severidade."*
+- Resultado: **Confirmada** — APT lidera em mediana ($32.3M); ransomware lidera em outliers absolutos (32 casos acima de $122M, 34% de todos os extremos)
+- Gráfico 1: Mediana de `total_loss_usd` por `attack_vector` + razão outlier/total (barplot duplo)
+- Gráfico 2: Contagem de outliers IQR por vetor + taxa interna de outliers por vetor
 
 **H2 — Hipótese sobre impacto no mercado por setor**
-- Hipótese sugerida: *"Empresas do setor financeiro sofrem quedas de preço de ação mais prolongadas (mais dias para recuperação) após incidentes graves."*
-- Gráfico 3: Distribuição de `price_recovery_days` por setor (barplot com erro)
-- Gráfico 4: Matriz de correlação entre variáveis numéricas do `silver_market` (heatmap com `abnormal_return_1d`, `abnormal_return_30d`, `car_30d`, `volatility_change`, `price_recovery_days`)
+- Hipótese implementada: *"Empresas do setor financeiro levam mais dias para o preço das ações se recuperar após incidentes de cibersegurança, comparado aos outros setores."*
+- Resultado: **Parcialmente confirmada** — Financials aparece em 5º lugar (116 dias); Information Technology (~140 dias) e Consumer Discretionary (~130 dias) lideram
+- Gráfico 3: Distribuição de `days_to_price_recovery` por setor (barplot com intervalo de confiança)
+- Gráfico 4: Matriz de correlação entre `abnormal_return_1d`, `abnormal_return_30d`, `car_0_to_30`, `car_0_to_90`, `pre_incident_volatility_30d`, `post_incident_volatility_30d`, `days_to_price_recovery`
 
 **H3 — Hipótese sobre evolução temporal e severidade**
-- Hipótese sugerida: *"Incidentes classificados como alta severidade (_is_high_impact = 1) aumentaram em frequência ao longo dos anos (2021–2025)."*
-- Gráfico 5: Frequência de incidentes por trimestre, separada por `_is_high_impact` (lineplot ou barplot empilhado)
-- Gráfico 6: Análise por recorte — frequência de ataque × severidade (heatmap com `attack_vector` × `_is_high_impact` ou `severity_level`)
+- Hipótese implementada: *"A proporção de incidentes de alta severidade (_is_high_impact = 1) cresceu entre 2021 e 2025, mostrando que os ataques estão ficando mais graves."*
+- Resultado: **Parcialmente confirmada** — volume cresceu 75% (131→229 incidentes), mas a taxa de alto impacto *caiu* de 50,4% para 41,0% (−2,1 p.p./ano)
+- Gráfico 5: Frequência de incidentes por ano, separada por `_is_high_impact` (barplot empilhado + linha de proporção)
+- Gráfico 6: Análise por recorte — volume e proporção de alto impacto por `attack_vector` (barplot duplo)
 
 ### Requisitos técnicos
 - Cada gráfico deve ter título, eixos rotulados e uma célula markdown com **interpretação textual + conclusão orientada a decisão**
@@ -167,40 +170,40 @@ Atualizar o `README.md` com:
 ## Checklist Final — Requisitos do Projeto
 
 ### EDA (Rodrigo)
-- [ ] ≥3 hipóteses formuladas e testadas
-- [ ] ≥6 gráficos com interpretação textual
-- [ ] Cobre: distribuição, outliers, correlação, análise por recorte
-- [ ] Data lineage atualizado até camada Ouro
+- [x] ≥3 hipóteses formuladas e testadas — H1 (APT/ransomware), H2 (setor financeiro), H3 (evolução temporal)
+- [x] ≥6 gráficos com interpretação textual — 2 gráficos por hipótese + 4 gráficos EDA geral
+- [x] Cobre: distribuição, outliers, correlação, análise por recorte
+- [x] Data lineage atualizado até camada Ouro — célula markdown completa no notebook
 
 ### Camada Ouro (Lucas)
-- [ ] ≥2 técnicas de encoding distintas
-- [ ] ≥1 estratégia de scaling
-- [ ] ≥2 estratégias de tratamento de missing values
-- [ ] Outliers tratados em ≥2 colunas (com justificativa)
-- [ ] Colunas de data leakage removidas ou justificadas
-- [ ] Pipeline no padrão fit/transform (sem vazamento treino→teste)
-- [ ] Dataset salvo em Parquet em `data/gold/`
-- [ ] Tabela de transformações documentada
-- [ ] Checklist anti-leakage atualizado
+- [x] ≥2 técnicas de encoding distintas — OrdinalEncoder (`attribution_confidence`) + OneHotEncoder (nominais)
+- [x] ≥1 estratégia de scaling — RobustScaler em 7 colunas numéricas contínuas
+- [x] ≥2 estratégias de tratamento de missing values — mediana (numéricas) + constante `'nao_disponivel'` (categóricas)
+- [x] Outliers tratados em ≥2 colunas (com justificativa) — winsorização IQR (`company_revenue_usd`) + log1p (`total_loss_usd`)
+- [x] Colunas de data leakage removidas ou justificadas — `data_compromised_records` e `downtime_hours` removidas
+- [x] Pipeline no padrão fit/transform (sem vazamento treino→teste) — ColumnTransformer fittado só no treino
+- [x] Dataset salvo em Parquet em `data/gold/` — `gold_dataset.parquet`, `gold_incidents.parquet`, `gold_market.parquet`, `gold_financials.parquet`
+- [x] Tabela de transformações documentada — `data/gold/documentacao_transformacoes_ouro.csv`
+- [x] Checklist anti-leakage atualizado — `data/gold/checklist_anti_leakage_ouro.csv`
 
 ### Modelagem ML (Bernardo)
-- [ ] ≥2 modelos de Árvore de Decisão com configs distintas
-- [ ] Split treino/teste com representatividade de classes
-- [ ] ≥3 métricas avaliadas (acurácia, precisão, recall, F1)
-- [ ] Matriz de confusão do melhor modelo
-- [ ] Visualização da árvore resultante
-- [ ] Comparação explícita Prata × Ouro com conclusão
+- [x] ≥2 modelos de Árvore de Decisão com configs distintas — DT_v1 (`max_depth=5`, gini) e DT_v2 (`max_depth=10`, entropy)
+- [x] Split treino/teste com representatividade de classes — 80/20 com `stratify=_is_high_impact`
+- [x] ≥3 métricas avaliadas (acurácia, precisão, recall, F1)
+- [x] Matriz de confusão do melhor modelo — gerada no notebook (célula 111)
+- [x] Visualização da árvore resultante — gerada no notebook (célula 112)
+- [x] Comparação explícita Prata × Ouro com conclusão — tabela Delta + célula markdown
 
 ### PySpark (Bernardo)
-- [ ] ≥2 etapas refatoradas com PySpark
-- [ ] Leitura em Parquet (ou Delta)
-- [ ] ≥1 operação de join
-- [ ] ≥1 groupBy com agregação
-- [ ] ≥1 função de janela
-- [ ] Escrita em Parquet (ou Delta)
-- [ ] Comparação de tempo Pandas vs PySpark discutida
+- [x] ≥2 etapas refatoradas com PySpark — ingestão/join e window functions
+- [x] Leitura em Parquet (ou Delta)
+- [x] ≥1 operação de join — `incidents` + `financials` por `incident_id`
+- [x] ≥1 groupBy com agregação — contagem e média por `attack_vector_primary`
+- [x] ≥1 função de janela — rank por `total_loss_usd` dentro de cada setor
+- [x] Escrita em Parquet (ou Delta) — `spark_output.parquet` e `spark_ranked.parquet`
+- [x] Comparação de tempo Pandas vs PySpark discutida — célula markdown com tempos cronometrados
 
 ### Entregáveis Gerais
-- [ ] notebook.ipynb com todas as etapas executáveis
-- [ ] Relatório de qualidade atualizado (Prata + Ouro)
-- [ ] README com instruções completas
+- [x] notebook.ipynb com todas as etapas executáveis
+- [ ] Relatório de qualidade atualizado (Prata + Ouro) — **executar célula 105 do notebook para gerar `relatorio_qualidade_ouro.csv`**
+- [x] README com instruções completas

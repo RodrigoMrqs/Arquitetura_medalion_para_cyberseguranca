@@ -53,8 +53,6 @@ pip install -r requirements.txt
 | Checklist anti-leakage — Ouro | `data/gold/checklist_anti_leakage_ouro.csv` |
 | Saída PySpark join | `data/gold/spark_output.parquet` |
 | Saída PySpark window | `data/gold/spark_ranked.parquet` |
-| Matriz de confusão | `docs/confusion_matrix.png` |
-| Visualização da árvore | `docs/decision_tree.png` |
 | Checklist anti-leakage — Silver | `data/silver/checklist_anti_leakage.csv` |
 | Documentação de transformações — Silver | `data/silver/documentacao_transformacoes.csv` |
 
