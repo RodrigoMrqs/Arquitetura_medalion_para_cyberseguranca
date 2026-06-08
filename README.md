@@ -5,11 +5,11 @@ Este repositório implementa um pipeline de engenharia de dados para cibersegura
 
 ## Pré-requisitos
 - Python 3.9+
-- Java 17 ou superior (testado com Java 23)
+- Java 17 ou superior (testado com Java 24)
 - PySpark 4.x (instalado via `requirements.txt`)
 - Dependências Python listadas em `requirements.txt`
 
-> **Atenção (Windows):** O Java 17+ requer a flag `-Djava.security.manager=allow` para compatibilidade com o Hadoop interno do PySpark. Essa configuração já está aplicada na célula de inicialização do Spark no notebook — nenhuma ação manual é necessária.
+> **Atenção (Windows):** Defina a variável `JAVA_HOME` apontando para o diretório do JDK (ex: `C:\Program Files\Java\jdk-24`). Essa configuração já está aplicada na célula de inicialização do Spark no notebook. **Não use `-Djava.security.manager=allow` com Java 24+**: o SecurityManager foi removido nessa versão e o flag causa falha imediata na inicialização da JVM.
 
 ## Instalação
 
